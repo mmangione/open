@@ -1,8 +1,5 @@
 version: '3'
 
-volumes:
-  caddy: {}
-
 services:
   django: &django
     build:
@@ -14,6 +11,8 @@ services:
     command: /start.sh
     volumes:
       - .:/app
+    depends_on:
+      - cloud-sql-proxy
 
   traefik:
     build:
@@ -25,19 +24,6 @@ services:
     ports:
       # SSL termination happens at the LB layer, all traffic here is http
       - "0.0.0.0:80:80"
-
-#  caddy:
-#    build:
-#      context: .
-#      dockerfile: ./compose/production/caddy/Dockerfile
-#    depends_on:
-#      - django
-#    image: gcr.io/proven-record-242223/open_caddy:latest
-#    volumes:
-#      - caddy:/root/.caddy
-#    ports:
-#      - "0.0.0.0:80:80"
-#      - "0.0.0.0:443:443"
 
   cloud-sql-proxy:
     image: gcr.io/cloudsql-docker/gce-proxy:1.11
@@ -56,12 +42,6 @@ services:
     volumes:
       - .:/app
     command: /start-celeryworker.sh
-
-  celerybeat:
-    image: gcr.io/proven-record-242223/open:latest
-    env_file:
-      - ./credentials/open/production/django.txt
-    volumes:
-      - .:/app
-    command: /start-celerybeat.sh
+    depends_on:
+      - cloud-sql-proxy
 

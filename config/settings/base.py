@@ -9,6 +9,9 @@ from config.constants import LOCAL
 ROOT_DIR = environ.Path(__file__) - 3  # (open/config/settings/base.py - 3 = open/)
 APPS_DIR = ROOT_DIR.path("open")
 
+BETTERSELF_DIR = APPS_DIR.path("core/betterself/")
+WRITEUP_DIR = APPS_DIR.path("core/writeup/")
+
 env = environ.Env()
 
 ENVIRONMENT = LOCAL
@@ -277,9 +280,10 @@ CELERY_RESULT_SERIALIZER = "json"
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-time-limit
 # TODO: set to whatever value is adequate in your circumstances
 CELERY_TASK_TIME_LIMIT = 5 * 60
+
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-soft-time-limit
 # TODO: set to whatever value is adequate in your circumstances
-CELERY_TASK_SOFT_TIME_LIMIT = 60
+CELERY_TASK_SOFT_TIME_LIMIT = 5 * 60
 
 # django-allauth
 # ------------------------------------------------------------------------------
@@ -316,7 +320,7 @@ REST_FRAMEWORK = {
     # anything more than five a second feels quite excessive for a human
     "DEFAULT_THROTTLE_RATES": {
         "anon": "5/second",
-        "user": "5/second",
+        "user": "25/second",
         # sure, im helping you write faster ... but 25 an hour is excessive
         "create_prompt_rate": "25/hour",
         "list_prompt_rate": "5/second",
@@ -349,7 +353,6 @@ GPT2_MEDIUM_COMPANIES_API_ENDPOINT = env(
     "GPT2_MEDIUM_COMPANIES_API_ENDPOINT", default="http://www.google.com/gpt2"
 )
 
-
 GPT2_LARGE_API_ENDPOINT = env(
     "GPT2_LARGE_API_ENDPOINT", default="https://www.google.com/gpt2"
 )
@@ -364,10 +367,31 @@ TRANSFORMERS_XL_API_ENDPOINT = env(
     default="https://www.google.com/transformers_xl_wt_103",
 )
 
-
 CORS_ORIGIN_WHITELIST = [
     "https://writeup.ai",
     "https://betterself.io",
     "https://www.betterself.io",
     "https://open.senrigan.io",
+    "https://app.betterself.io",
+    "https://betterself.io",
+    "http://localhost:5000",
+    "http://localhost:3000",
 ]
+
+BETTERSELF_PERSONAL_USERNAME = env("BETTERSELF_PERSONAL_USERNAME", default="12345")
+BETTERSELF_PERSONAL_API_KEY = env("BETTERSELF_PERSONAL_API_KEY", default="12345")
+
+BETTERSELF_LEGACY_DB_NAME = env("BETTERSELF_LEGACY_DB_NAME", default="12345")
+BETTERSELF_LEGACY_DB_USER = env("BETTERSELF_LEGACY_DB_USER", default="12345")
+BETTERSELF_LEGACY_DB_PASSWORD = env("BETTERSELF_LEGACY_DB_PASSWORD", default="12345")
+BETTERSELF_LEGACY_DB_HOST = env("BETTERSELF_LEGACY_DB_HOST", default="12345")
+BETTERSELF_LEGACY_DB_PORT = env("BETTERSELF_LEGACY_DB_PORT", default="12345")
+
+BETTERSELF_LEGACY_APP_USERNAME = env("BETTERSELF_LEGACY_APP_USERNAME", default="12345")
+BETTERSELF_LEGACY_APP_USERNAME_PASSWORD = env(
+    "BETTERSELF_LEGACY_APP_USERNAME_PASSWORD", default="12345"
+)
+
+TEMPLATED_EMAIL_BACKEND = "templated_email.backends.vanilla_django.TemplateBackend"
+
+BETTERSELF_APP_URL = "http://localhost:5000"

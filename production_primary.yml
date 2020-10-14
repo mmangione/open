@@ -1,0 +1,57 @@
+version: '3'
+
+# this file is the exact same (or should be) as production.yml except it includes celerybeat
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: gcr.io/proven-record-242223/open:latest
+    env_file:
+      - ./credentials/open/production/django.txt
+    command: /start.sh
+    depends_on:
+      - cloud-sql-proxy
+    volumes:
+      - .:/app
+
+  traefik:
+    build:
+      context: .
+      dockerfile: ./compose/production/traefik/Dockerfile
+    image: gcr.io/proven-record-242223/open_traefik:latest
+    depends_on:
+      - django
+    ports:
+      # SSL termination happens at the LB layer, all traffic here is http
+      - "0.0.0.0:80:80"
+
+  cloud-sql-proxy:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.11
+    command: >
+      /cloud_sql_proxy -instances=proven-record-242223:us-east1:open-b522b437=tcp:0.0.0.0:5432
+      -credential_file /root/.config/senrigan_gcp_sql_access.json
+    volumes:
+      - ./credentials/open/production/:/root/.config
+    ports:
+      - 5432:5432
+
+  celeryworker:
+    image: gcr.io/proven-record-242223/open:latest
+    env_file:
+      - ./credentials/open/production/django.txt
+    volumes:
+      - .:/app
+    command: /start-celeryworker.sh
+    depends_on:
+      - cloud-sql-proxy
+
+  celerybeat:
+    image: gcr.io/proven-record-242223/open:latest
+    env_file:
+      - ./credentials/open/production/django.txt
+    volumes:
+      - .:/app
+    command: /start-celerybeat.sh
+    depends_on:
+      - cloud-sql-proxy
